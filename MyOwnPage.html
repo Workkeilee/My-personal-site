@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Colorful Themed Page (No external CSS/JS)</title>
+</head>
+<body>
+  <header id="site-header">
+    <h1 id="title">Palette Playground</h1>
+    <p id="subtitle">A tiny, colorful HTML demo — no external CSS or JS.</p>
+    <div id="controls">
+      <button id="cycle">Cycle theme</button>
+      <button id="random">Randomize</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="card">
+      <h2>About</h2>
+      <p>
+        This simple page shows how to apply a theme and layout using only HTML with a bit of
+        inline styling applied through a <code>&lt;script&gt;</code> tag — no external CSS or JS files.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Features</h2>
+      <ul>
+        <li>Responsive-ish layout</li>
+        <li>Multiple palettes</li>
+        <li>Accessible contrast focus</li>
+      </ul>
+    </section>
+
+    <section class="card grid">
+      <div class="tile">
+        <strong>Primary</strong>
+        <div class="swatch" data-role="primary"></div>
+      </div>
+      <div class="tile">
+        <strong>Accent</strong>
+        <div class="swatch" data-role="accent"></div>
+      </div>
+      <div class="tile">
+        <strong>Surface</strong>
+        <div class="swatch" data-role="surface"></div>
+      </div>
+      <div class="tile">
+        <strong>Text</strong>
+        <div class="swatch" data-role="text"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer">
+    <small>Made for quick demos · No external CSS/JS · Works with JS enabled</small>
+  </footer>
+
+  <!-- All theming & layout done via this script (no <style> block / external files) -->
+  <script>
+  (function () {
+    // Palettes: [primary, accent, surface, text]
+    const palettes = [
+      ['#1F6FEB', '#FF7A00', '#F6FAFF', '#05204A'], // cool-blue + orange
+      ['#8E44AD', '#F39C12', '#FFF0FF', '#2C0735'], // purple + amber
+      ['#16A085', '#2ECC71', '#EAF9F6', '#08331F'], // teal + green
+      ['#E53935', '#FDD835', '#FFF7F6', '#3B0A09'], // red + yellow
+      ['#0A3D62', '#38B000', '#E8FFF7', '#05200F']  // deep + lime
+    ];
+
+    // Utility: set multiple inline styles on an element
+    function set(el, props) {
+      for (const k in props) el.style[k] = props[k];
+    }
+
+    // Create a simple layout and base styles via JS (no <style> tag)
+    function applyBaseLayout() {
+      const body = document.body;
+      set(body, {
+        margin: '0',
+        fontFamily: "'Segoe UI', Roboto, system-ui, -apple-system, sans-serif",
+        lineHeight: '1.4',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        padding: '20px'
+      });
+
+      const header = document.getElementById('site-header');
+      set(header, {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        flexWrap: 'wrap'
+      });
+
+      set(document.getElementById('title'), {
+        margin: '0',
+        fontSize: 'clamp(1.4rem, 2.6vw, 2rem)'
+      });
+
+      set(document.getElementById('subtitle'), { margin: '0', opacity: '0.9' });
+
+      set(document.getElementById('controls'), { display: 'flex', gap: '8px' });
+
+      const btns = document.querySelectorAll('button');
+      btns.forEach(b => {
+        set(b, {
+          padding: '8px 12px',
+          border: 'none',
+          borderRadius: '10px',
+          cursor: 'pointer',
+          fontWeight: '600'
+        });
+      });
+
+      const main = document.getElementById('main');
+      set(main, {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '16px',
+        width: '100%'
+      });
+
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(c => {
+        set(c, {
+          padding: '16px',
+          borderRadius: '12px',
+          boxShadow: '0 6px 18px rgba(0,0,0,0.06)',
+          minHeight: '100px'
+        });
+      });
+
+      const gridTiles = document.querySelectorAll('.grid .tile');
+      gridTiles.forEach(t => {
+        set(t, { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '8px' });
+      });
+
+      const swatches = document.querySelectorAll('.swatch');
+      swatches.forEach(s => {
+        set(s, { width: '56px', height: '36px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.06)' });
+      });
+
+      const footer = document.getElementById('footer');
+      set(footer, { marginTop: 'auto', textAlign: 'center', opacity: '0.8' });
+    }
+
+    // Apply a palette (inline styles) to the document
+    function applyPalette(p) {
+      const [primary, accent, surface, text] = p;
+      // Page background & text
+      set(document.body, { backgroundColor: surface, color: text });
+
+      // Header and title styling
+      set(document.getElementById('site-header'), { borderBottom: `1px solid ${hexFade(text, 0.08)}`, paddingBottom: '12px' });
+      set(document.getElementById('title'), { color: primary });
+
+      // Buttons
+      const cycle = document.getElementById('cycle');
+      const random = document.getElementById('random');
+      set(cycle, {
+        background: primary,
+        color: readableText(primary),
+        boxShadow: `0 6px 14px ${hexFade(primary, 0.14)}`
+      });
+      set(random, {
+        background: accent,
+        color: readableText(accent),
+        boxShadow: `0 6px 14px ${hexFade(accent, 0.14)}`
+      });
+
+      // Cards
+      document.querySelectorAll('.card').forEach(c => {
+        set(c, {
+          background: lighten(surface, 0.02),
+          border: `1px solid ${hexFade(text, 0.06)}`
+        });
+      });
+
+      // Swatches
+      document.querySelector('[data-role="primary"]').style.background = primary;
+      document.querySelector('[data-role="accent"]').style.background = accent;
+      document.querySelector('[data-role="surface"]').style.background = surface;
+      document.querySelector('[data-role="text"]').style.background = text;
+
+      // Link-like emphasis (not actual <a> here) — underline accent on hover
+      document.querySelectorAll('.card h2').forEach(h => {
+        set(h, { margin: '0 0 8px 0' });
+      });
+    }
+
+    // Helpers for colours
+    function hexToRgb(hex) {
+      hex = hex.replace('#','');
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      const num = parseInt(hex,16);
+      return [num>>16, (num>>8)&255, num&255];
+    }
+    function hexFade(hex, alpha) {
+      const [r,g,b] = hexToRgb(hex);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+    function readableText(bgHex) {
+      const [r,g,b] = hexToRgb(bgHex);
+      // luminance
+      const l = 0.2126*r + 0.7152*g + 0.0722*b;
+      return l > 140 ? '#111' : '#fff';
+    }
+    function lighten(hex, amt) {
+      const [r,g,b] = hexToRgb(hex);
+      const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
+      return `rgb(${clamp(r + 255*amt)}, ${clamp(g + 255*amt)}, ${clamp(b + 255*amt)})`;
+    }
+
+    // Interactivity
+    let idx = 0;
+    function cycle() {
+      idx = (idx + 1) % palettes.length;
+      applyPalette(palettes[idx]);
+    }
+    function randomize() {
+      idx = Math.floor(Math.random() * palettes.length);
+      applyPalette(palettes[idx]);
+    }
+
+    // Boot
+    applyBaseLayout();
+    applyPalette(palettes[idx]);
+
+    // Wire buttons
+    document.getElementById('cycle').addEventListener('click', cycle);
+    document.getElementById('random').addEventListener('click', randomize);
+
+    // Optional: keyboard shortcut (T) to cycle themes
+    document.addEventListener('keydown', function (e) {
+      if (e.key.toLowerCase() === 't') cycle();
+    });
+
+  })();
+  </script>
+</body>
+</html>
